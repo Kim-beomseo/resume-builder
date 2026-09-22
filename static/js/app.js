@@ -115,7 +115,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 })
             });
 
-            const data = await response.json();
+            // [안전한 응답 파싱: HTML 에러 페이지 및 JSON 분기]
+            let data;
+            const contentType = response.headers.get('content-type') || '';
+            if (contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                const text = await response.text();
+                if (!response.ok) {
+                    if (response.status === 504) {
+                        throw new Error('AI 생성 시간 초과 (504 Timeout): Vercel 무료 플랜 시간 제한을 초과했습니다. 잠시 후 다시 시도해 주세요.');
+                    }
+                    if (response.status === 500) {
+                        throw new Error('서버 내부 오류 (500): Vercel의 GEMINI_API_KEY 환경변수 설정을 확인해 주세요.');
+                    }
+                    throw new Error(`서버 오류 (${response.status}): 요청을 처리하지 못했습니다.`);
+                }
+                try {
+                    data = JSON.parse(text);
+                } catch (parseErr) {
+                    throw new Error('서버로부터 올바른 JSON 응답을 받지 못했습니다.');
+                }
+            }
 
             if (!response.ok) {
                 // 백엔드에서 반환한 오류 처리 (400 또는 500)
@@ -222,6 +243,56 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.warn('⚠️ PWA ServiceWorker 등록 실패:', err);
                 });
         });
+    }
+
+    // 7. PWA 설치 배너 및 버튼 동작
+    let deferredPrompt = null;
+    const pwaBanner = document.getElementById('pwa-install-banner');
+    const pwaInstallBtn = document.getElementById('pwa-install-btn');
+
+    // 이미 Standalone 모드(앱으로 실행 중)인지 확인
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+    if (!isStandalone && pwaBanner && pwaInstallBtn) {
+        // 브라우저의 기본 설치 유도 이벤트 감지
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            pwaBanner.classList.remove('hidden');
+        });
+
+        // 설치 버튼 클릭 이벤트
+        pwaInstallBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    pwaBanner.classList.add('hidden');
+                }
+                deferredPrompt = null;
+            } else {
+                // iOS Safari 또는 데스크톱 미지원 시 친절한 안내
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+                if (isIOS) {
+                    alert('📱 아이폰/아이패드 설치 방법:\n브라우저 하단의 [공유] 버튼(⎋)을 누른 후 [홈 화면에 추가]를 선택해 주세요!');
+                } else {
+                    alert('💡 앱 설치 방법:\n브라우저 주소창 우측의 [앱 설치] 아이콘(컴퓨터 모양)을 클릭하시거나, 브라우저 메뉴(⋮)에서 [앱 설치]를 눌러주세요.');
+                }
+            }
+        });
+
+        // 설치 완료 시 배너 자동 숨김
+        window.addEventListener('appinstalled', () => {
+            pwaBanner.classList.add('hidden');
+            deferredPrompt = null;
+        });
+
+        // 사이트 방문 시 배너 즉시 노출
+        setTimeout(() => {
+            if (!isStandalone && pwaBanner.classList.contains('hidden')) {
+                pwaBanner.classList.remove('hidden');
+            }
+        }, 1000);
     }
 });
 
