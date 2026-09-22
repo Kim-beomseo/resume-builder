@@ -7,8 +7,15 @@ from google import genai
 # .env 파일에서 환경변수 로드
 load_dotenv()
 
-# Flask 애플리케이션 생성
-app = Flask(__name__)
+# 프로젝트 루트 디렉토리 기준 절대 경로 설정
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Flask 애플리케이션 생성 (Vercel 환경에서도 경로 보장)
+app = Flask(
+    __name__,
+    template_folder=os.path.join(BASE_DIR, 'templates'),
+    static_folder=os.path.join(BASE_DIR, 'static')
+)
 
 # Backend 로깅 설정
 logging.basicConfig(
@@ -24,12 +31,12 @@ def index():
 @app.route('/manifest.json')
 def manifest():
     """PWA 매니페스트 서빙"""
-    return send_from_directory('static', 'manifest.json', mimetype='application/manifest+json')
+    return send_from_directory(app.static_folder, 'manifest.json', mimetype='application/manifest+json')
 
 @app.route('/sw.js')
 def service_worker():
     """PWA Service Worker 서빙 (루트 스코프 허용 헤더 포함)"""
-    response = make_response(send_from_directory('static', 'sw.js', mimetype='application/javascript'))
+    response = make_response(send_from_directory(app.static_folder, 'sw.js', mimetype='application/javascript'))
     response.headers['Service-Worker-Allowed'] = '/'
     return response
 
