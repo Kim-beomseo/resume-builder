@@ -24,16 +24,20 @@ logging.basicConfig(
 )
 
 @app.route('/')
+@app.route('/api/index.py')
+@app.route('/api/index')
 def index():
     """메인 입력 및 결과 페이지 렌더링"""
     return render_template('index.html')
 
 @app.route('/manifest.json')
+@app.route('/api/manifest.json')
 def manifest():
     """PWA 매니페스트 서빙"""
     return send_from_directory(app.static_folder, 'manifest.json', mimetype='application/manifest+json')
 
 @app.route('/sw.js')
+@app.route('/api/sw.js')
 def service_worker():
     """PWA Service Worker 서빙 (루트 스코프 허용 헤더 포함)"""
     response = make_response(send_from_directory(app.static_folder, 'sw.js', mimetype='application/javascript'))
@@ -41,6 +45,7 @@ def service_worker():
     return response
 
 @app.route('/generate', methods=['POST'])
+@app.route('/api/generate', methods=['POST'])
 def generate():
     """Gemini API를 호출하여 이력서 및 포트폴리오 생성"""
     # 1. 요청 데이터 확인
