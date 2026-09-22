@@ -1,31 +1,28 @@
+<br/><br/>
+<pre><code>{
+"version": 2,
+"builds": [
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "app.py",
-      "use": "@vercel/python"
-    },
-    {
-      "src": "public/**",
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/generate",
-      "dest": "/app.py"
-    },
-    {
-      "src": "/api/generate",
-      "dest": "/app.py"
-    },
-    {
-      "src": "/static/(.*)",
-      "dest": "/static/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/app.py"
-    }
-  ]
+"src": "api/index.py",
+"use": "@vercel/python"
+},
+{
+"src": "public/**",
+"use": "@vercel/static"
+}
+],
+"routes": [
+{
+"src": "/generate",
+"dest": "/api/index.py"
+},
+{
+"src": "/api/(.)",
+"dest": "/api/index.py"
+},
+{
+"src": "/(.)",
+"dest": "/api/index.py"
+}
+]
 }
