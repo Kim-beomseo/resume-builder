@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Resume & Portfolio Builder</title>
+    <!-- 외부 스타일시트 연결 -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- 상단 헤더: 일러스트 & 반짝이는 효과 -->
+        <header class="header rainbow-glow">
+            <div class="header-illustration">
+                <!-- AI Resume 일러스트 SVG -->
+                <svg class="hero-svg" viewBox="0 0 200 130" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="rainbowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#ff007f" />
+                            <stop offset="20%" stop-color="#ff7f00" />
+                            <stop offset="40%" stop-color="#ffff00" />
+                            <stop offset="60%" stop-color="#00ff7f" />
+                            <stop offset="80%" stop-color="#00e5ff" />
+                            <stop offset="100%" stop-color="#a855f7" />
+                        </linearGradient>
+                        <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#fef08a" />
+                            <stop offset="50%" stop-color="#facc15" />
+                            <stop offset="100%" stop-color="#ca8a04" />
+                        </linearGradient>
+                    </defs>
+                    <!-- 배경 홀로그램 원 -->
+                    <circle cx="100" cy="65" r="55" fill="none" stroke="url(#rainbowGrad)" stroke-width="2.5" opacity="0.6" stroke-dasharray="6,4" class="rotating-ring" />
+                    <!-- 문서 뼈대 -->
+                    <rect x="68" y="25" width="64" height="80" rx="8" fill="#18181b" stroke="url(#goldGrad)" stroke-width="2.5" />
+                    <!-- 문서 내부 텍스트 라인들 -->
+                    <rect x="76" y="38" width="30" height="4" rx="2" fill="url(#rainbowGrad)" />
+                    <rect x="76" y="48" width="48" height="3" rx="1.5" fill="#facc15" opacity="0.8" />
+                    <rect x="76" y="56" width="44" height="3" rx="1.5" fill="#a1a1aa" />
+                    <rect x="76" y="64" width="48" height="3" rx="1.5" fill="#a1a1aa" />
+                    <rect x="76" y="72" width="36" height="3" rx="1.5" fill="#a1a1aa" />
+                    <!-- AI 반짝이 배지 -->
+                    <circle cx="120" cy="35" r="14" fill="#09090b" stroke="url(#rainbowGrad)" stroke-width="2" />
+                    <text x="120" y="39" font-size="11" text-anchor="middle" fill="#facc15" font-weight="bold">AI</text>
+                    <!-- 날아다니는 별빛 장식 -->
+                    <path d="M42,40 L45,46 L51,48 L45,50 L42,56 L39,50 L33,48 L39,46 Z" fill="url(#rainbowGrad)" class="floating-star-1" />
+                    <path d="M160,80 L162,85 L167,86 L162,88 L160,93 L158,88 L153,86 L158,85 Z" fill="#ffff00" class="floating-star-2" />
+                </svg>
+            </div>
+            <h1 class="rainbow-text">✨ AI Resume & Portfolio Builder ✨</h1>
+            <p>Google Gemini AI와 함께 만드는 <span class="highlight-rainbow">눈부시게 빛나는</span> 맞춤형 이력서 & 포트폴리오</p>
+        </header>
+
+        <!-- 메인 콘텐츠 영역 (입력 폼 & 결과 영역) -->
+        <main class="main-content">
+            <!-- 1. 입력 폼 영역 -->
+            <section class="form-section">
+                <h2>📝 정보 입력</h2>
+                <form id="resume-form" novalidate>
+                    <!-- 이름 입력 -->
+                    <div class="form-group">
+                        <label for="name">이름 <span class="required">*</span></label>
+                        <input type="text" id="name" name="name" placeholder="예: 홍길동" required>
+                    </div>
+
+                    <!-- 지원 직무 입력 -->
+                    <div class="form-group">
+                        <label for="role">지원 직무 <span class="required">*</span></label>
+                        <input type="text" id="role" name="role" placeholder="예: 백엔드 개발자, 서비스 기획자 등" required>
+                    </div>
+
+                    <!-- 경력 사항 입력 -->
+                    <div class="form-group">
+                        <label for="experience">주요 경력 사항 <span class="required">*</span></label>
+                        <textarea id="experience" name="experience" rows="4" placeholder="근무 기간, 소속, 담당 업무를 자유롭게 적어주세요." required></textarea>
+                    </div>
+
+                    <!-- 프로젝트 경험 입력 -->
+                    <div class="form-group">
+                        <label for="projects">프로젝트 경험 <span class="required">*</span></label>
+                        <textarea id="projects" name="projects" rows="4" placeholder="진행했던 주요 프로젝트명, 문제 해결 내용, 사용 기술 등을 적어주세요." required></textarea>
+                    </div>
+
+                    <!-- 작성 어조(Tone) 선택 -->
+                    <div class="form-group">
+                        <label for="tone">작성 어조 (Tone)</label>
+                        <select id="tone" name="tone">
+                            <option value="전문적이고 신뢰감 있는">전문적이고 신뢰감 있는 (기본)</option>
+                            <option value="열정적이고 도전적인">열정적이고 도전적인</option>
+                            <option value="간결하고 담백한">간결하고 담백한</option>
+                            <option value="창의적이고 감각적인">창의적이고 감각적인</option>
+                        </select>
+                    </div>
+
+                    <!-- 디자인 테마 선택 -->
+                    <div class="form-group">
+                        <label for="theme-select">🎨 디자인 테마 (Design Theme)</label>
+                        <select id="theme-select" name="theme">
+                            <option value="theme-black-gold" selected>🌟 럭셔리 블랙 & 골드 (Black & Gold Sparkle)</option>
+                            <option value="theme-tech-blue">💼 모던 테크 블루 (Modern Tech Blue)</option>
+                            <option value="theme-cyberpunk">🌌 사이버펑크 네온 (Cyberpunk Neon)</option>
+                            <option value="theme-minimal">🌿 클린 에메랄드 (Clean Emerald Light)</option>
+                        </select>
+                    </div>
+
+                    <!-- 이력서 표지 생성 옵션 -->
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="include-cover" name="include_cover" checked>
+                            <span>📘 <strong>멋진 이력서 표지(Cover Page)</strong> 함께 생성하기</span>
+                        </label>
+                    </div>
+
+                    <!-- 프롬프트 엔진 모드 선택 -->
+                    <div class="form-group">
+                        <label>작성 모드 (Prompt Type)</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="prompt_type" value="A" checked>
+                                <span><strong>Prompt A (일반 모드)</strong>: 친절하고 정돈된 AI 취업 멘토 스타일</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="prompt_type" value="B">
+                                <span><strong>Prompt B (전문가 모드)</strong>: STAR 기법 & 성과/수치 중심 헤드헌터 스타일</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 오류 메시지 표시 영역 -->
+                    <div id="error-message" class="error-box hidden" role="alert"></div>
+
+                    <!-- 생성 버튼 -->
+                    <button type="submit" id="submit-btn" class="btn btn-primary">
+                        ✨ 이력서 & 포트폴리오 생성하기
+                    </button>
+                </form>
+            </section>
+
+            <!-- 2. 결과 표시 영역 -->
+            <section class="result-section">
+                <div class="result-header">
+                    <h2>📄 생성된 결과</h2>
+                    <!-- 복사 및 다운로드 액션 버튼들 -->
+                    <div class="action-buttons">
+                        <button id="copy-btn" class="btn btn-secondary" disabled>📋 전체 복사</button>
+                        <button id="download-btn" class="btn btn-secondary" disabled>💾 Markdown 다운로드</button>
+                    </div>
+                </div>
+
+                <!-- 로딩 표시 (스피너) -->
+                <div id="loading-spinner" class="loading-box hidden">
+                    <div class="spinner"></div>
+                    <p>AI가 맞춤형 이력서와 포트폴리오를 작성하고 있습니다.<br>잠시만 기다려 주세요 (약 5~15초 소요)...</p>
+                </div>
+
+                <!-- 결과 텍스트 표시 상자 -->
+                <div id="result-placeholder" class="placeholder-box">
+                    <p>왼쪽에서 정보를 입력하고 <strong>[생성하기]</strong> 버튼을 누르면 이곳에 AI가 작성한 결과가 표시됩니다.</p>
+                </div>
+                <div id="result-content" class="result-box hidden" tabindex="0"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 마크다운 렌더링 라이브러리 (marked.js) -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- 외부 자바스크립트 연결 -->
+    <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+</body>
+</html>
