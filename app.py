@@ -1,6 +1,6 @@
 import os
 import logging
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_from_directory, make_response
 from dotenv import load_dotenv
 from google import genai
 
@@ -20,6 +20,18 @@ logging.basicConfig(
 def index():
     """메인 입력 및 결과 페이지 렌더링"""
     return render_template('index.html')
+
+@app.route('/manifest.json')
+def manifest():
+    """PWA 매니페스트 서빙"""
+    return send_from_directory('static', 'manifest.json', mimetype='application/manifest+json')
+
+@app.route('/sw.js')
+def service_worker():
+    """PWA Service Worker 서빙 (루트 스코프 허용 헤더 포함)"""
+    response = make_response(send_from_directory('static', 'sw.js', mimetype='application/javascript'))
+    response.headers['Service-Worker-Allowed'] = '/'
+    return response
 
 @app.route('/generate', methods=['POST'])
 def generate():

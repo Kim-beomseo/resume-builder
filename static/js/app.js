@@ -210,4 +210,18 @@ document.addEventListener('DOMContentLoaded', () => {
         // 메모리 해제
         URL.revokeObjectURL(downloadUrl);
     });
+
+    // 6. PWA Service Worker 등록
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js')
+                .then((registration) => {
+                    console.log('✅ PWA ServiceWorker 등록 완료, scope:', registration.scope);
+                })
+                .catch((err) => {
+                    console.warn('⚠️ PWA ServiceWorker 등록 실패:', err);
+                });
+        });
+    }
 });
+

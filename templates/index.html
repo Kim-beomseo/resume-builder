@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Resume & Portfolio Builder</title>
+    <!-- PWA 및 모바일 최적화 메타 설정 -->
+    <meta name="theme-color" content="#09090b">
+    <meta name="description" content="Google Gemini AI와 함께 만드는 맞춤형 이력서 & 포트폴리오 빌더">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="AI Resume">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-192.png') }}">
+    <link rel="manifest" href="/manifest.json">
+
     <!-- 외부 스타일시트 연결 -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
