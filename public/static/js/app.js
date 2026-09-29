@@ -244,55 +244,5 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
         });
     }
-
-    // 7. PWA 설치 배너 및 버튼 동작
-    let deferredPrompt = null;
-    const pwaBanner = document.getElementById('pwa-install-banner');
-    const pwaInstallBtn = document.getElementById('pwa-install-btn');
-
-    // 이미 Standalone 모드(앱으로 실행 중)인지 확인
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-
-    if (!isStandalone && pwaBanner && pwaInstallBtn) {
-        // 브라우저의 기본 설치 유도 이벤트 감지
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            pwaBanner.classList.remove('hidden');
-        });
-
-        // 설치 버튼 클릭 이벤트
-        pwaInstallBtn.addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    pwaBanner.classList.add('hidden');
-                }
-                deferredPrompt = null;
-            } else {
-                // iOS Safari 또는 데스크톱 미지원 시 친절한 안내
-                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-                if (isIOS) {
-                    alert('📱 아이폰/아이패드 설치 방법:\n브라우저 하단의 [공유] 버튼(⎋)을 누른 후 [홈 화면에 추가]를 선택해 주세요!');
-                } else {
-                    alert('💡 앱 설치 방법:\n브라우저 주소창 우측의 [앱 설치] 아이콘(컴퓨터 모양)을 클릭하시거나, 브라우저 메뉴(⋮)에서 [앱 설치]를 눌러주세요.');
-                }
-            }
-        });
-
-        // 설치 완료 시 배너 자동 숨김
-        window.addEventListener('appinstalled', () => {
-            pwaBanner.classList.add('hidden');
-            deferredPrompt = null;
-        });
-
-        // 사이트 방문 시 배너 즉시 노출
-        setTimeout(() => {
-            if (!isStandalone && pwaBanner.classList.contains('hidden')) {
-                pwaBanner.classList.remove('hidden');
-            }
-        }, 1000);
-    }
 });
 
