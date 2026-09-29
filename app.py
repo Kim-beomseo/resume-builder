@@ -1,5 +1,6 @@
 import os
 import logging
+from urllib.parse import parse_qs
 from flask import Flask, render_template, request, jsonify, send_from_directory, make_response
 from dotenv import load_dotenv
 from google import genai
@@ -17,17 +18,52 @@ app = Flask(
     static_folder=os.path.join(BASE_DIR, 'static')
 )
 
+class VercelPathFixer:
+    """
+    Vercel Serverless Function 환경에서 vercel.json rewrite로 인해
+    PATH_INFO가 '/api/index.py'로 변조되는 문제를 해결하는 WSGI 미들웨어.
+    """
+    def __init__(self, wsgi_app):
+        self.wsgi_app = wsgi_app
+
+    def __call__(self, environ, start_response):
+        path = environ.get('PATH_INFO', '')
+        query_string = environ.get('QUERY_STRING', '')
+        params = parse_qs(query_string)
+        
+        # 1. 쿼리스트링의 __path 파라미터 확인
+        if '__path' in params and params['__path']:
+            orig_path = '/' + params['__path'][0].lstrip('/')
+            environ['PATH_INFO'] = orig_path
+        elif path in ('/api/index.py', '/api/index', '/api', '/api/', ''):
+            # 2. 서버 프록시 헤더 확인
+            resolved = None
+            for key in ('HTTP_X_MATCHED_PATH', 'HTTP_X_FORWARDED_URI', 'HTTP_X_ORIGINAL_URI', 'REQUEST_URI', 'RAW_URI'):
+                val = environ.get(key)
+                if val:
+                    resolved = '/' + val.split('?')[0].lstrip('/')
+                    break
+            if resolved and resolved not in ('/api/index.py', '/api/index', '/api', '/api/'):
+                environ['PATH_INFO'] = resolved
+
+        return self.wsgi_app(environ, start_response)
+
+# WSGI 미들웨어 등록 (Vercel이 app.py를 직접 로드하든 api/index.py를 로드하든 100% 적용)
+app.wsgi_app = VercelPathFixer(app.wsgi_app)
+
 # Backend 로깅 설정
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s [%(levelname)s] %(message)s'
 )
 
-@app.route('/')
-@app.route('/api/index.py')
-@app.route('/api/index')
+@app.route('/', methods=['GET', 'POST'])
+@app.route('/api/index.py', methods=['GET', 'POST'])
+@app.route('/api/index', methods=['GET', 'POST'])
 def index():
-    """메인 입력 및 결과 페이지 렌더링"""
+    """메인 입력 및 결과 페이지 렌더링 (Vercel rewrite 환경에서 POST 요청 인입 시 generate로 자동 연결하여 405 방지)"""
+    if request.method == 'POST':
+        return generate()
     return render_template('index.html')
 
 @app.route('/manifest.json')
