@@ -262,6 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
             window.addEventListener('beforeinstallprompt', (e) => {
                 e.preventDefault();
                 deferredPrompt = e;
+                console.log('💡 beforeinstallprompt event captured!');
                 pwaBanner.classList.remove('hidden');
             });
 
@@ -270,23 +271,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (deferredPrompt) {
                     deferredPrompt.prompt();
                     const { outcome } = await deferredPrompt.userChoice;
+                    console.log('Install prompt outcome:', outcome);
                     if (outcome === 'accepted') {
                         pwaBanner.classList.add('hidden');
                     }
                     deferredPrompt = null;
+                    return;
+                }
+
+                // 기기 및 브라우저 환경 판별 (인앱 브라우저, iOS, Android 분기)
+                const ua = navigator.userAgent || '';
+                const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+                const isKakao = /KAKAOTALK/i.test(ua);
+                const isNaver = /NAVER/i.test(ua);
+                const isAndroid = /Android/i.test(ua);
+
+                if (isKakao || isNaver) {
+                    alert('⚠️ 현재 카카오톡(또는 인앱) 브라우저에서는 홈 화면 앱 설치가 제한됩니다.\n\n우측 상단 또는 하단의 메뉴(⋮)에서 [다른 브라우저로 열기](Chrome 또는 Safari)를 누른 후 설치해 주세요!');
+                } else if (isIOS) {
+                    alert('📱 아이폰/아이패드 홈 화면 앱 추가 방법:\n\n1. Safari 브라우저 하단 중앙의 [공유] 버튼(⎋)을 누릅니다.\n2. 메뉴를 아래로 스크롤하여 [홈 화면에 추가]를 선택합니다.\n3. 우측 상단의 [추가]를 누르면 홈 화면에 앱이 생성됩니다!');
+                } else if (isAndroid) {
+                    alert('📱 안드로이드 앱 설치 안내:\n\n1. Chrome 브라우저 우측 상단 메뉴(⋮)를 탭합니다.\n2. [앱 설치] 또는 [홈 화면에 추가]를 선택해 주세요!\n(사이트 탐색 후 잠시 뒤 자동 설치 팝업이 활성화될 수 있습니다)');
                 } else {
-                    // iOS Safari 또는 안내 필요 시
-                    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-                    if (isIOS) {
-                        alert('📱 아이폰/아이패드 홈 화면 앱 추가 방법:\n\n1. Safari 브라우저 하단의 [공유] 버튼(⎋)을 탭합니다.\n2. 아래로 스크롤하여 [홈 화면에 추가]를 선택합니다.');
-                    } else {
-                        alert('💡 앱 설치 안내:\n\n브라우저 주소창 우측의 [앱 설치] 아이콘(모니터 모양)을 클릭하시거나, 브라우저 메뉴(⋮)에서 [앱 설치] 또는 [홈 화면에 추가]를 눌러주세요.');
-                    }
+                    alert('💡 데스크톱 앱 설치 방법:\n\n1. 브라우저 주소창 우측 끝의 [앱 설치] 아이콘을 클릭하시거나\n2. 브라우저 메뉴(⋮)에서 [앱 설치]를 클릭해 주세요.');
                 }
             });
 
             // 설치 완료 감지
             window.addEventListener('appinstalled', () => {
+                console.log('✅ PWA app installed successfully');
                 pwaBanner.classList.add('hidden');
                 deferredPrompt = null;
             });
