@@ -14,7 +14,7 @@
     <link rel="manifest" href="/manifest.json">
 
     <!-- 외부 스타일시트 연결 -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=2.2">
 </head>
 <body>
     <div class="container">
@@ -58,6 +58,20 @@
             </div>
             <h1 class="rainbow-text">✨ AI Resume & Portfolio Builder ✨</h1>
             <p>Google Gemini AI와 함께 만드는 <span class="highlight-rainbow">눈부시게 빛나는</span> 맞춤형 이력서 & 포트폴리오</p>
+
+            <!-- PWA 앱 설치 배너 -->
+            <div id="pwa-install-banner" class="pwa-banner">
+                <div class="pwa-banner-content">
+                    <span class="pwa-icon">📲</span>
+                    <div class="pwa-text">
+                        <strong>앱으로 더 편리하게 이용하세요!</strong>
+                        <span>홈 화면에 설치하면 앱처럼 빠르고 쾌적하게 열립니다.</span>
+                    </div>
+                </div>
+                <button type="button" id="pwa-install-btn" class="btn btn-pwa">
+                    ✨ 지금 앱 설치하기
+                </button>
+            </div>
         </header>
 
         <!-- 메인 콘텐츠 영역 (입력 폼 & 결과 영역) -->
@@ -174,6 +188,6 @@
     <!-- 마크다운 렌더링 라이브러리 (marked.js) -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <!-- 외부 자바스크립트 연결 -->
-    <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}?v=2.2" defer></script>
 </body>
 </html>

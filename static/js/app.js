@@ -244,5 +244,53 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
         });
     }
+
+    // 7. PWA 설치 배너 및 버튼 동작
+    let deferredPrompt = null;
+    const pwaBanner = document.getElementById('pwa-install-banner');
+    const pwaInstallBtn = document.getElementById('pwa-install-btn');
+
+    // 이미 Standalone 모드(앱으로 실행 중)인지 확인
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+    if (pwaBanner && pwaInstallBtn) {
+        if (isStandalone) {
+            // 이미 앱으로 실행 중이면 배너 숨김
+            pwaBanner.classList.add('hidden');
+        } else {
+            // 브라우저의 기본 설치 이벤트 가로채기
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                pwaBanner.classList.remove('hidden');
+            });
+
+            // 설치 버튼 클릭 핸들러
+            pwaInstallBtn.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        pwaBanner.classList.add('hidden');
+                    }
+                    deferredPrompt = null;
+                } else {
+                    // iOS Safari 또는 안내 필요 시
+                    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+                    if (isIOS) {
+                        alert('📱 아이폰/아이패드 홈 화면 앱 추가 방법:\n\n1. Safari 브라우저 하단의 [공유] 버튼(⎋)을 탭합니다.\n2. 아래로 스크롤하여 [홈 화면에 추가]를 선택합니다.');
+                    } else {
+                        alert('💡 앱 설치 안내:\n\n브라우저 주소창 우측의 [앱 설치] 아이콘(모니터 모양)을 클릭하시거나, 브라우저 메뉴(⋮)에서 [앱 설치] 또는 [홈 화면에 추가]를 눌러주세요.');
+                    }
+                }
+            });
+
+            // 설치 완료 감지
+            window.addEventListener('appinstalled', () => {
+                pwaBanner.classList.add('hidden');
+                deferredPrompt = null;
+            });
+        }
+    }
 });
 

@@ -44,6 +44,11 @@ def service_worker():
     response.headers['Service-Worker-Allowed'] = '/'
     return response
 
+@app.route('/static/<path:filename>')
+def serve_static(filename):
+    """정적 자산 서빙 (Vercel Serverless Function 이중 안전장치)"""
+    return send_from_directory(app.static_folder, filename)
+
 @app.route('/generate', methods=['POST'])
 @app.route('/api/generate', methods=['POST'])
 def generate():
